@@ -1,65 +1,48 @@
 import type {
-  IOClients,
   ParamsContext,
   ServiceContext,
   RecorderState,
+  ClientsConfig,
 } from '@vtex/api'
 import { Service } from '@vtex/api'
 
-import { example } from './events/example'
-import { createSendEvent } from './routes/notify'
-import { getCacheContext, setCacheContext } from './utils/cachedContext'
+import { skuChange } from './events/skuChange'
+import { Clients } from './clients'
 
-const TREE_SECONDS_MS = 3 * 1000
+const TIMEOUT_MS = 10000
 const CONCURRENCY = 10
 
 declare global {
-  type Context = ServiceContext<IOClients, State>
+  type Context = ServiceContext<Clients, State>
 
   interface State extends RecorderState {
     code: number
   }
 }
 
-function sendEventWithTimer() {
-  setInterval(function () {
-    const context = getCacheContext()
-
-    if (!context) {
-      console.log('no context in memory')
-
-      return
-    }
-
-    return createSendEvent(context)
-  }, 30000)
-  console.log('FIRED HERE')
+const clients: ClientsConfig<Clients> = {
+  // We pass our custom implementation of the clients bag, containing the Status client.
+  implementation: Clients,
+  options: {
+    // All IO Clients will be initialized with these options, unless otherwise specified.
+    default: {
+      retries: 2,
+      timeout: TIMEOUT_MS,
+    },
+    events: {
+      exponentialTimeoutCoefficient: 2,
+      exponentialBackoffCoefficient: 2,
+      initialBackoffDelay: 50,
+      retries: 1,
+      timeout: TIMEOUT_MS,
+      concurrency: CONCURRENCY,
+    },
+  },
 }
 
-sendEventWithTimer()
-
-export default new Service<IOClients, State, ParamsContext>({
-  clients: {
-    options: {
-      events: {
-        exponentialTimeoutCoefficient: 2,
-        exponentialBackoffCoefficient: 2,
-        initialBackoffDelay: 50,
-        retries: 1,
-        timeout: TREE_SECONDS_MS,
-        concurrency: CONCURRENCY,
-      },
-    },
-  },
+export default new Service<Clients, State, ParamsContext>({
+  clients,
   events: {
-    example,
-  },
-  routes: {
-    hcheck: (ctx: any) => {
-      setCacheContext(ctx)
-      ctx.set('Cache-Control', 'no-cache')
-      ctx.status = 200
-      ctx.body = 'ok'
-    },
+    skuChange,
   },
 })

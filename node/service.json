@@ -9,6 +9,9 @@
     "example": {
       "sender": "vtex.events-example",
       "keys": ["send-event"]
+    },
+    "skuChange": {
+      "keys": ["broadcaster.notification"]
     }
   },
   "routes": {
