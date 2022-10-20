@@ -2,7 +2,7 @@
   "name": "kit-indexer",
   "vendor": "vtex",
   "version": "0.0.1",
-  "title": "Events Example",
+  "title": "Kit Indexer",
   "description": "Indexer for kits in VTEX",
   "dependencies": {
     "vtex.catalog-api-proxy": "0.x"
