@@ -1,9 +1,9 @@
 {
-  "name": "kit-indexer",
+  "name": "ki-739693",
   "vendor": "vtex",
   "version": "1.0.0",
-  "title": "Kit Indexer",
-  "description": "Indexer for kits in VTEX",
+  "title": "KI 739693",
+  "description": "App for fixing KI 739693",
   "dependencies": {
     "vtex.catalog-api-proxy": "0.x"
   },
@@ -26,6 +26,13 @@
       "attrs": {
         "host": "portal.vtexcommercestable.com.br",
         "path": "*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.vtex.com",
+        "path": "/{{account}}/pricing/prices/*"
       }
     },
     {

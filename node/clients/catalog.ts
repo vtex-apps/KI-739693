@@ -1,15 +1,6 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
-interface UpdateBody {
-  ProductId: number
-  Name: string
-  PackagedHeight: number
-  PackagedLength: number
-  PackagedWidth: number
-  PackagedWeightKg: number
-}
-
 export default class Catalog extends ExternalClient {
   constructor(context: IOContext, options?: InstanceOptions) {
     super(`http://${context.account}.myvtex.com/api`, context, {
@@ -30,11 +21,5 @@ export default class Catalog extends ExternalClient {
         metric: 'get-product-by-sku-id',
       }
     )
-  }
-
-  public async updateProduct(data: UpdateBody, skuId: string) {
-    return this.http.put(`/catalog/pvt/stockkeepingunit/${skuId}`, data, {
-      metric: 'update-product-by-sku-id',
-    })
   }
 }

@@ -6,7 +6,7 @@ import type { Clients } from '../clients'
 interface Item {
   Id: number
   Name: string
-  unitPrice: number
+  UnitPrice: number
   Amount: number
   EstimatedDateArrival: string
   Dimension: Dimension
@@ -25,7 +25,7 @@ interface Dimension {
 
 export async function skuChange(ctx: EventContext<Clients>) {
   const {
-    clients: { catalog: catalogClient },
+    clients: { catalog: catalogClient, pricing: pricingClient },
   } = ctx
 
   const { IdSku, HasStockKeepingUnitModified } = ctx.body
@@ -33,19 +33,19 @@ export async function skuChange(ctx: EventContext<Clients>) {
   if (!HasStockKeepingUnitModified) return
 
   let product
-  let totalWeight = 0
+  let totalPrice = 0
 
   try {
-    // Add individual weights
+    // Add individual prices
     product = await catalogClient.getProduct(IdSku)
 
     if (product.IsKit) {
       const { KitItems } = product
 
-      totalWeight = 0
+      totalPrice = 0
 
       KitItems.forEach((element: Item) => {
-        totalWeight += element.Dimension.weight
+        totalPrice += element.UnitPrice * element.Amount
       })
     }
   } catch (error) {
@@ -59,20 +59,25 @@ export async function skuChange(ctx: EventContext<Clients>) {
     throw new NotFoundError(erroMessage)
   }
 
-  if (product?.IsKit && totalWeight !== product.Dimension.weight) {
-    // Update base product with the fixed weight
+  if (product?.IsKit) {
     try {
-      await catalogClient.updateProduct(
-        {
-          ProductId: product.ProductId,
-          Name: product.NameComplete,
-          PackagedHeight: product.Dimension.height,
-          PackagedLength: product.Dimension.length,
-          PackagedWidth: product.Dimension.width,
-          PackagedWeightKg: totalWeight,
-        },
-        IdSku
-      )
+      // Get price
+      const price = await pricingClient.getPrice(IdSku)
+
+      // Update price with new calculated price
+      await pricingClient.updatePrice(IdSku, {
+        ...price,
+        listPrice: totalPrice,
+        costPrice: totalPrice,
+        basePrice: totalPrice,
+        fixedPrices: [
+          {
+            ...price.fixedPrices[0],
+            value: totalPrice,
+            listPrice: totalPrice,
+          },
+        ],
+      })
     } catch (error) {
       const erroMessage = `SKU ${IdSku} cannot be updated.`
       const splunkError = {

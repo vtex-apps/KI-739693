@@ -4,11 +4,11 @@ App in VTEX that receives a notification when a SKU is changed, if the SKU chang
 
 ## How it works?
 
-![diagram](images/indexer-diagram.png)
+![diagram](images/diagram.png)
 
 ## How to install
 
 ⚠️ First, make sure the broadcaster app is installed.
 ![my-apps](images/apps.png)
 
-Run command: `vtex install vtex.kit-indexer`
+Run command: `vtex install vtex.ki-739693`
