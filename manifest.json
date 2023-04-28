@@ -1,7 +1,7 @@
 {
   "name": "ki-739693",
   "vendor": "vtex",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "KI 739693",
   "description": "App for fixing KI 739693",
   "dependencies": {
